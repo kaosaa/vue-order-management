@@ -186,6 +186,20 @@ export default {
   overflow: hidden;
 }
 
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .login-container {
+    padding: 12px;
+    align-items: flex-start;
+    padding-top: 10vh;
+  }
+
+  .login-card {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+}
+
 .card-header {
   text-align: center;
   color: #303133;

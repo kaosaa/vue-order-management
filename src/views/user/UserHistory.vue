@@ -500,6 +500,7 @@ export default {
     const getStatusType = (status) => {
       const types = {
         'pending': 'warning',
+        'processing': 'info',
         'completed': 'success',
         'cancelled': 'danger'
       }
@@ -509,8 +510,9 @@ export default {
     const getStatusText = (status) => {
       const texts = {
         'pending': '待处理',
+        'processing': '待结算',
         'completed': '已完成',
-        'cancelled': '已取消'
+        'cancelled': '已作废'
       }
       return texts[status] || status
     }

@@ -1,33 +1,32 @@
 <template>
-  <div class="order-management">
+  <div class="order-management responsive-container">
     <!-- Header -->
     <div class="page-header">
       <h2>订单管理</h2>
-      <div class="header-actions">
+      <div class="header-actions responsive-search">
         <el-input
           v-model="searchKeyword"
           placeholder="搜索订单号、用户姓名"
           clearable
-          style="width: 250px; margin-right: 16px"
+          class="search-input"
           @input="handleSearch"
         >
           <template #prefix>
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
-        
+
         <el-button @click="refreshData">
           <el-icon><Refresh /></el-icon>
-          刷新数据
+          <span class="hide-on-mobile">刷新数据</span>
         </el-button>
       </div>
     </div>
 
     <!-- Statistics Cards -->
-    <el-row :gutter="20" style="margin-bottom: 20px">
-      <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-item">
+    <div class="responsive-stats">
+      <el-card class="stat-card">
+        <div class="stat-item">
             <div class="stat-icon total">
               <el-icon><Document /></el-icon>
             </div>
@@ -52,7 +51,21 @@
           </div>
         </el-card>
       </el-col>
-      
+
+      <el-col :span="6">
+        <el-card class="stat-card">
+          <div class="stat-item">
+            <div class="stat-icon processing">
+              <el-icon><Money /></el-icon>
+            </div>
+            <div class="stat-content">
+              <h3>{{ orderStats.processing }}</h3>
+              <p>待结算</p>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-item">
@@ -75,7 +88,7 @@
             </div>
             <div class="stat-content">
               <h3>{{ orderStats.cancelled }}</h3>
-              <p>已取消</p>
+              <p>已作废</p>
             </div>
           </div>
         </el-card>
@@ -91,8 +104,9 @@
             <el-select v-model="statusFilter" placeholder="筛选状态" clearable style="width: 120px; margin-right: 16px">
               <el-option label="全部" value="" />
               <el-option label="待处理" value="pending" />
+              <el-option label="待结算" value="processing" />
               <el-option label="已完成" value="completed" />
-              <el-option label="已取消" value="cancelled" />
+              <el-option label="已作废" value="cancelled" />
             </el-select>
             
             <el-date-picker
@@ -110,12 +124,13 @@
         </div>
       </template>
 
-      <el-table 
-        :data="filteredOrders" 
-        v-loading="loading"
-        style="width: 100%"
-        :default-sort="{ prop: 'createdAt', order: 'descending' }"
-      >
+      <div class="responsive-table">
+        <el-table
+          :data="filteredOrders"
+          v-loading="loading"
+          style="width: 100%"
+          :default-sort="{ prop: 'createdAt', order: 'descending' }"
+        >
         <el-table-column prop="id" label="订单号" width="100" sortable>
           <template #default="{ row }">
             <div style="font-family: monospace; font-weight: 500">
@@ -252,7 +267,8 @@
             </div>
           </template>
         </el-table-column>
-      </el-table>
+        </el-table>
+      </div>
 
       <!-- Pagination -->
       <div style="margin-top: 20px; text-align: center">
@@ -366,7 +382,19 @@
             clearable
           />
         </el-form-item>
-        
+
+        <el-form-item label="订单状态" prop="status">
+          <el-select v-model="editForm.status" placeholder="选择订单状态" style="width: 100%">
+            <el-option label="待处理" value="pending" />
+            <el-option label="待结算" value="processing" />
+            <el-option label="已完成" value="completed" />
+            <el-option label="已作废" value="cancelled" />
+          </el-select>
+          <div style="font-size: 12px; color: #909399; margin-top: 4px">
+            正常流程：待处理 → 待结算 → 已完成
+          </div>
+        </el-form-item>
+
         <el-form-item label="备注说明">
           <el-input
             v-model="editForm.notes"
@@ -425,7 +453,8 @@ export default {
       quantity: 1,
       courierId: '',
       trackingNumber: '',
-      notes: ''
+      notes: '',
+      status: 'pending'
     })
     
     const editRules = {
@@ -448,10 +477,11 @@ export default {
     const orderStats = computed(() => {
       const total = orders.value.length
       const pending = orders.value.filter(o => o.status === 'pending').length
+      const processing = orders.value.filter(o => o.status === 'processing').length
       const completed = orders.value.filter(o => o.status === 'completed').length
       const cancelled = orders.value.filter(o => o.status === 'cancelled').length
-      
-      return { total, pending, completed, cancelled }
+
+      return { total, pending, processing, completed, cancelled }
     })
 
     const filteredOrders = computed(() => {
@@ -503,8 +533,9 @@ export default {
     const getStatusLabel = (status) => {
       const labels = {
         pending: '待处理',
+        processing: '待结算',
         completed: '已完成',
-        cancelled: '已取消'
+        cancelled: '已作废'
       }
       return labels[status] || status
     }
@@ -512,6 +543,7 @@ export default {
     const getStatusTagType = (status) => {
       const types = {
         pending: 'warning',
+        processing: 'info',
         completed: 'success',
         cancelled: 'danger'
       }
@@ -564,6 +596,7 @@ export default {
       editForm.courierId = order.courierId
       editForm.trackingNumber = order.trackingNumber || ''
       editForm.notes = order.notes || ''
+      editForm.status = order.status || 'pending'
       editDialogVisible.value = true
     }
 
@@ -589,6 +622,7 @@ export default {
           courierId: editForm.courierId,
           trackingNumber: editForm.trackingNumber.trim(),
           notes: editForm.notes.trim(),
+          status: editForm.status,
           totalAmount: selectedProduct ? selectedProduct.price * editForm.quantity : 0
         }
         
@@ -750,6 +784,10 @@ export default {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
+.stat-icon.processing {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+}
+
 .stat-icon.completed {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
@@ -840,6 +878,81 @@ export default {
   .action-buttons .el-button {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* Mobile specific responsive styles */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .page-header h2 {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  /* Adjust action buttons for mobile */
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
+    align-items: stretch;
+  }
+
+  .action-buttons .el-button {
+    font-size: 11px;
+    padding: 4px 8px;
+    width: 100%;
+  }
+
+  /* Mobile table optimizations */
+  .stat-item {
+    flex-direction: column;
+    text-align: center;
+    padding: 12px;
+  }
+
+  .stat-icon {
+    margin-bottom: 8px;
+    margin-right: 0;
+  }
+
+  .stat-content h3 {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  .stat-content p {
+    font-size: 12px;
+  }
+
+  /* Hide less important columns on mobile */
+  .el-table .el-table__cell:nth-child(6),
+  .el-table .el-table__cell:nth-child(7) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header h2 {
+    font-size: 18px;
+  }
+
+  /* Hide even more columns on very small screens */
+  .el-table .el-table__cell:nth-child(4),
+  .el-table .el-table__cell:nth-child(5) {
+    display: none;
   }
 }
 </style>

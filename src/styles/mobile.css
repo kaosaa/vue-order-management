@@ -1,0 +1,233 @@
+/**
+ * 移动端适配CSS工具类
+ * 提供响应式设计的通用样式类
+ */
+
+/* 导入到main.js中作为全局样式 */
+
+/* 响应式容器 */
+.responsive-container {
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .responsive-container {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-container {
+    padding: 8px;
+  }
+}
+
+/* 响应式表格 */
+.responsive-table {
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .responsive-table .el-table {
+    font-size: 12px;
+  }
+
+  .responsive-table .el-table .el-table__cell {
+    padding: 6px 4px;
+  }
+
+  .responsive-table .el-table__header-wrapper th {
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .responsive-table .el-button--small {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+/* 响应式卡片 */
+.responsive-card {
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .responsive-card {
+    margin-bottom: 12px;
+  }
+
+  .responsive-card .el-card__body {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-card .el-card__body {
+    padding: 12px;
+  }
+}
+
+/* 响应式表单 */
+.responsive-form {
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .responsive-form .el-form-item__label {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .responsive-form .el-input {
+    font-size: 14px;
+  }
+
+  .responsive-form .el-select {
+    width: 100%;
+  }
+
+  .responsive-form .el-date-editor {
+    width: 100%;
+  }
+}
+
+/* 响应式按钮组 */
+.responsive-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .responsive-buttons {
+    gap: 6px;
+  }
+
+  .responsive-buttons .el-button {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .responsive-buttons .el-button {
+    width: 100%;
+    margin: 0;
+  }
+}
+
+/* 响应式描述列表 */
+.responsive-descriptions {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .responsive-descriptions .el-descriptions {
+    font-size: 13px;
+  }
+
+  .responsive-descriptions .el-descriptions--column-1 .el-descriptions__body .el-descriptions__table .el-descriptions__cell {
+    padding: 8px 0;
+  }
+
+  .responsive-descriptions .el-descriptions__label {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .responsive-descriptions .el-descriptions__content {
+    font-size: 13px;
+  }
+}
+
+/* 响应式搜索栏 */
+.responsive-search {
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .responsive-search .el-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .responsive-search .el-form-item {
+    margin-bottom: 8px;
+  }
+
+  .responsive-search .el-input,
+  .responsive-search .el-select,
+  .responsive-search .el-date-picker {
+    width: 100%;
+  }
+}
+
+/* 响应式统计卡片 */
+.responsive-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .responsive-stats {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+}
+
+/* 隐藏元素工具类 */
+.hide-on-mobile {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none;
+  }
+}
+
+.show-on-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .show-on-mobile {
+    display: block;
+  }
+}
+
+/* 文本截断工具类 */
+.text-truncate-mobile {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .text-truncate-mobile {
+    max-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .text-truncate-mobile {
+    max-width: 80px;
+  }
+}

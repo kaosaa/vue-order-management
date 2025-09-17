@@ -185,8 +185,8 @@ const validationRules = {
   updateOrder: [
     body('status')
       .optional()
-      .isIn(['pending', 'completed', 'cancelled'])
-      .withMessage('订单状态只能是pending, completed或cancelled'),
+      .isIn(['pending', 'processing', 'completed', 'cancelled'])
+      .withMessage('订单状态只能是pending(待处理), processing(待结算), completed(已完成)或cancelled(已作废)'),
     body('tracking_number')
       .optional()
       .isLength({ min: 5, max: 50 })

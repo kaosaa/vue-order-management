@@ -602,7 +602,7 @@ router.put('/orders/:id', authenticate, requireAdmin, validationRules.validateId
     const updateFields = []
     const updateValues = []
 
-    if (status && ['pending', 'completed', 'cancelled'].includes(status)) {
+    if (status && ['pending', 'processing', 'completed', 'cancelled'].includes(status)) {
       updateFields.push('status = ?')
       updateValues.push(status)
     }
