@@ -90,6 +90,42 @@
   .responsive-form .el-date-editor {
     width: 100%;
   }
+
+  /* 修复日期选择器在移动端的显示问题 */
+  .responsive-form .el-date-editor.el-input {
+    width: 100% !important;
+  }
+
+  .responsive-form .el-date-editor .el-input__inner {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+}
+
+/* 全局日期选择器移动端优化 */
+@media (max-width: 768px) {
+  .el-date-editor {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .el-date-editor .el-input__inner {
+    font-size: 13px !important;
+    padding: 8px 10px !important;
+  }
+
+  .el-date-editor .el-input__prefix {
+    left: 8px !important;
+  }
+
+  .el-date-editor .el-input__suffix {
+    right: 8px !important;
+  }
+
+  /* 日期选择器下拉面板优化 */
+  .el-picker-panel {
+    max-width: calc(100vw - 20px) !important;
+  }
 }
 
 /* 响应式按钮组 */

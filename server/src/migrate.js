@@ -51,7 +51,7 @@ const migrations = [
         price DECIMAL(10,2) NOT NULL,
         total_amount DECIMAL(10,2) NOT NULL,
         tracking_number VARCHAR(50) NOT NULL,
-        status VARCHAR(20) DEFAULT 'pending' CHECK(status IN ('pending', 'completed', 'cancelled')),
+        status VARCHAR(20) DEFAULT 'pending' CHECK(status IN ('pending', 'processing', 'completed', 'cancelled')),
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
@@ -137,6 +137,51 @@ const migrations = [
     sql: `
       -- Create unique index on tracking_number to prevent duplicates
       CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_tracking_number ON orders(tracking_number);
+    `
+  },
+  {
+    version: 4,
+    description: 'Update order status constraint to support processing status',
+    sql: `
+      -- Create temporary table with new status constraint
+      CREATE TABLE IF NOT EXISTS orders_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        product_id INTEGER NOT NULL,
+        courier_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        price DECIMAL(10,2) NOT NULL,
+        total_amount DECIMAL(10,2) NOT NULL,
+        tracking_number VARCHAR(50) NOT NULL,
+        status VARCHAR(20) DEFAULT 'pending' CHECK(status IN ('pending', 'processing', 'completed', 'cancelled')),
+        notes TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE RESTRICT,
+        FOREIGN KEY (courier_id) REFERENCES couriers (id) ON DELETE RESTRICT
+      );
+
+      -- Copy data from old table to new table
+      INSERT INTO orders_new (id, user_id, product_id, courier_id, quantity, price, total_amount, tracking_number, status, notes, created_at, updated_at)
+      SELECT id, user_id, product_id, courier_id, quantity, price, total_amount, tracking_number, status, notes, created_at, updated_at
+      FROM orders;
+
+      -- Drop old table
+      DROP TABLE orders;
+
+      -- Rename new table
+      ALTER TABLE orders_new RENAME TO orders;
+
+      -- Recreate indexes and triggers
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_tracking_number ON orders(tracking_number);
+
+      CREATE TRIGGER IF NOT EXISTS trigger_orders_updated_at
+        AFTER UPDATE ON orders
+        FOR EACH ROW
+      BEGIN
+        UPDATE orders SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+      END;
     `
   }
 ]

@@ -305,6 +305,35 @@ export const useAdminStore = defineStore('admin', () => {
     return exportData
   }
 
+  // Delete order
+  const deleteOrder = async (orderId) => {
+    try {
+      isLoading.value = true
+
+      const response = await fetch(getApiUrl(`/admin/orders/${orderId}`), {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || '删除订单失败')
+      }
+
+      // Log admin action
+      await logAdminAction('delete_order', `删除订单 #${orderId}`)
+
+      return data
+
+    } catch (error) {
+      console.error('Error deleting order:', error)
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     // State
     users,
@@ -330,6 +359,7 @@ export const useAdminStore = defineStore('admin', () => {
     validateAlipayAccount,
     checkDuplicatePhone,
     checkDuplicateAlipay,
-    exportUsersToExcel
+    exportUsersToExcel,
+    deleteOrder
   }
 })

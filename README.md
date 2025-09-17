@@ -26,16 +26,65 @@
 - Excel数据导出
 - 响应式设计
 
-## 技术栈
+## 🚀 技术栈
 
-- **前端框架**: Vue 3 + Composition API
-- **构建工具**: Vite
-- **UI组件库**: Element Plus
-- **状态管理**: Pinia
-- **路由**: Vue Router 4
-- **HTTP客户端**: Axios
-- **样式**: CSS3 + Element Plus主题
-- **文件导出**: XLSX + FileSaver.js
+### 前端技术栈
+- **框架**: Vue.js 3.4+ (Composition API)
+- **构建工具**: Vite 5.0+
+- **UI框架**: Element Plus 2.4+
+- **状态管理**: Pinia 2.1+
+- **路由**: Vue Router 4.2+
+- **HTTP客户端**: Axios 1.6+
+- **图标**: @element-plus/icons-vue 2.3+
+- **数据处理**: XLSX 0.18+ (Excel导出)
+- **文件保存**: file-saver 2.0+
+- **代码规范**: ESLint + Prettier
+
+### 后端技术栈
+- **运行时**: Node.js 16.0+
+- **框架**: Express.js 4.18+
+- **数据库**: SQLite 3 (sqlite3 5.1+)
+- **身份验证**: JWT (jsonwebtoken 9.0+)
+- **密码加密**: bcryptjs 2.4+
+- **数据验证**: express-validator 7.0+
+- **安全**: Helmet 7.1+ (HTTP安全头)
+- **跨域**: CORS 2.8+
+- **限流**: express-rate-limit 7.1+
+- **日志**: Morgan 1.10+ (HTTP请求日志)
+- **环境变量**: dotenv 16.3+
+- **文件上传**: Multer 1.4+
+- **UUID生成**: uuid 9.0+
+- **开发工具**: Nodemon 3.0+
+
+### 数据库设计
+- **用户表** (`users`): 用户认证、角色管理、个人信息
+- **商品表** (`products`): 商品信息、价格、状态管理
+- **快递表** (`couriers`): 快递公司信息、单号长度验证
+- **订单表** (`orders`): 订单生命周期、状态流转、关联关系
+- **管理日志表** (`admin_logs`): 管理员操作审计
+
+## 📋 订单状态流程
+
+```
+正常流程：
+待处理 (pending) → 待结算 (processing) → 已完成 (completed)
+
+特殊情况：
+任何状态 → 已作废 (cancelled)
+```
+
+## 🎯 系统架构
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   前端 (Vue.js)  │────│  后端 (Express) │────│  数据库 (SQLite) │
+│                 │HTTP│                 │SQL │                 │
+│ • Vue 3 + Vite  │    │ • RESTful API   │    │ • 关系型数据     │
+│ • Element Plus  │    │ • JWT Auth      │    │ • 事务支持       │
+│ • Pinia Store   │    │ • 数据验证       │    │ • 索引优化       │
+│ • 响应式设计     │    │ • 安全中间件     │    │ • 触发器        │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
 
 ## 快速开始
 

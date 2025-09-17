@@ -73,13 +73,18 @@
       </el-col>
     </el-row>
 
-    <!-- Courier Table -->
-    <el-card>
+    <!-- Courier Table/Cards -->
+    <el-card class="couriers-container">
       <template #header>
         <div class="card-header">
           <span>快递公司列表</span>
           <div class="header-tools">
-            <el-select v-model="statusFilter" placeholder="筛选状态" clearable style="width: 120px">
+            <el-select
+              v-model="statusFilter"
+              placeholder="筛选状态"
+              clearable
+              class="status-filter"
+            >
               <el-option label="全部" value="" />
               <el-option label="启用" value="active" />
               <el-option label="禁用" value="inactive" />
@@ -88,111 +93,241 @@
         </div>
       </template>
 
-      <el-table 
-        :data="filteredCouriers" 
-        v-loading="loading"
-        style="width: 100%"
-        :default-sort="{ prop: 'created_at', order: 'descending' }"
-      >
-        <el-table-column prop="id" label="ID" width="60" sortable />
-        
-        <el-table-column prop="name" label="快递公司" min-width="160">
-          <template #default="{ row }">
-            <div>
-              <div style="font-weight: 500; color: #303133; font-size: 14px">{{ row.name }}</div>
-              <div style="font-size: 12px; color: #909399; margin-top: 2px">
-                代码: {{ row.code || '未设置' }} | 单号长度: {{ row.tracking_length || row.trackingLength }}位
+      <!-- Desktop Table View -->
+      <div class="desktop-view">
+        <el-table
+          :data="filteredCouriers"
+          v-loading="loading"
+          style="width: 100%"
+          :default-sort="{ prop: 'created_at', order: 'descending' }"
+          class="couriers-table"
+        >
+          <el-table-column prop="id" label="ID" width="60" sortable />
+
+          <el-table-column prop="name" label="快递公司" min-width="160">
+            <template #default="{ row }">
+              <div class="courier-info">
+                <div class="courier-name">{{ row.name }}</div>
+                <div class="courier-details">
+                  代码: {{ row.code || '未设置' }} | 单号长度: {{ row.tracking_length || row.trackingLength }}位
+                </div>
               </div>
-            </div>
-          </template>
-        </el-table-column>
+            </template>
+          </el-table-column>
 
-        <el-table-column prop="code" label="快递代码" width="100">
-          <template #default="{ row }">
-            <el-tag v-if="row.code" size="small" type="primary">{{ row.code }}</el-tag>
-            <span v-else style="color: #c0c4cc; font-size: 12px">未设置</span>
-          </template>
-        </el-table-column>
+          <el-table-column prop="code" label="快递代码" width="100">
+            <template #default="{ row }">
+              <el-tag v-if="row.code" size="small" type="primary">{{ row.code }}</el-tag>
+              <span v-else class="no-data">未设置</span>
+            </template>
+          </el-table-column>
 
-        <el-table-column prop="tracking_length" label="单号长度" width="100">
-          <template #default="{ row }">
-            <span style="font-family: monospace; font-weight: 500; color: #409eff">
-              {{ row.tracking_length || row.trackingLength }} 位
-            </span>
-          </template>
-        </el-table-column>
+          <el-table-column prop="tracking_length" label="单号长度" width="100">
+            <template #default="{ row }">
+              <span class="tracking-length">
+                {{ row.tracking_length || row.trackingLength }} 位
+              </span>
+            </template>
+          </el-table-column>
 
-        <el-table-column prop="tracking_pattern" label="单号格式" min-width="120">
-          <template #default="{ row }">
-            <code style="background: #f5f7fa; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #606266">
-              {{ row.tracking_pattern || row.trackingPattern || '未设置' }}
-            </code>
-          </template>
-        </el-table-column>
-        
-        <el-table-column prop="status" label="状态" width="80">
-          <template #default="{ row }">
-            <el-tag :type="row.status === 'active' ? 'success' : 'danger'">
-              {{ row.status === 'active' ? '启用' : '禁用' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        
-        <el-table-column prop="created_at" label="创建时间" width="160" sortable>
-          <template #default="{ row }">
-            {{ formatDate(row.created_at || row.createdAt) }}
-          </template>
-        </el-table-column>
+          <el-table-column prop="tracking_pattern" label="单号格式" min-width="120">
+            <template #default="{ row }">
+              <code class="tracking-pattern">
+                {{ row.tracking_pattern || row.trackingPattern || '未设置' }}
+              </code>
+            </template>
+          </el-table-column>
 
-        <el-table-column prop="updated_at" label="更新时间" width="160">
-          <template #default="{ row }">
-            {{ formatDate(row.updated_at || row.updatedAt) }}
-          </template>
-        </el-table-column>
-        
-        <el-table-column label="操作" width="200" fixed="right">
-          <template #default="{ row }">
-            <el-button size="small" @click="editCourier(row)">
-              <el-icon><Edit /></el-icon>
-              编辑
-            </el-button>
-            
-            <el-button 
-              size="small" 
-              :type="row.status === 'active' ? 'warning' : 'success'"
-              @click="toggleCourierStatus(row)"
-            >
-              <el-icon v-if="row.status === 'active'"><Hide /></el-icon>
-              <el-icon v-else><View /></el-icon>
-              {{ row.status === 'active' ? '禁用' : '启用' }}
-            </el-button>
-            
-            <el-popconfirm
-              title="确定要删除这个快递公司吗？"
-              @confirm="deleteCourier(row)"
-            >
-              <template #reference>
-                <el-button size="small" type="danger">
-                  <el-icon><Delete /></el-icon>
-                  删除
+          <el-table-column prop="status" label="状态" width="80">
+            <template #default="{ row }">
+              <el-tag :type="row.status === 'active' ? 'success' : 'danger'">
+                {{ row.status === 'active' ? '启用' : '禁用' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="created_at" label="创建时间" width="160" sortable>
+            <template #default="{ row }">
+              {{ formatDate(row.created_at || row.createdAt) }}
+            </template>
+          </el-table-column>
+
+          <el-table-column label="操作" width="200">
+            <template #default="{ row }">
+              <div class="desktop-actions">
+                <el-button size="small" @click="editCourier(row)">
+                  <el-icon><Edit /></el-icon>
+                  编辑
                 </el-button>
-              </template>
-            </el-popconfirm>
-          </template>
-        </el-table-column>
-      </el-table>
+
+                <!-- 更多操作按钮 -->
+                <el-dropdown @command="(command) => handleMoreActions(row, command)" trigger="click">
+                  <el-button size="small" type="info" plain>
+                    <el-icon><MoreFilled /></el-icon>
+                    更多
+                  </el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item
+                        :command="row.status === 'active' ? 'disable' : 'enable'"
+                      >
+                        <el-icon v-if="row.status === 'active'"><Hide /></el-icon>
+                        <el-icon v-else><View /></el-icon>
+                        {{ row.status === 'active' ? '禁用' : '启用' }}
+                      </el-dropdown-item>
+                      <el-dropdown-item command="delete" divided>
+                        <el-icon><Delete /></el-icon>
+                        删除
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+      <!-- Mobile Card View -->
+      <div class="mobile-view">
+        <div v-if="loading" class="loading-state">
+          <el-icon class="is-loading"><Loading /></el-icon>
+          <div>加载中...</div>
+        </div>
+
+        <div v-else-if="filteredCouriers.length === 0" class="empty-state">
+          <el-icon><Truck /></el-icon>
+          <div>暂无快递公司数据</div>
+        </div>
+
+        <div v-else class="mobile-couriers">
+          <div
+            v-for="courier in filteredCouriers"
+            :key="courier.id"
+            class="courier-card"
+          >
+            <el-card shadow="hover">
+              <!-- Card Header -->
+              <div class="card-header-mobile">
+                <div class="courier-title">
+                  {{ courier.name }}
+                </div>
+                <el-tag :type="courier.status === 'active' ? 'success' : 'danger'" size="default">
+                  {{ courier.status === 'active' ? '启用' : '禁用' }}
+                </el-tag>
+              </div>
+
+              <!-- Card Body -->
+              <div class="card-body">
+                <!-- Courier Code Row -->
+                <div class="info-row">
+                  <div class="info-label">
+                    <el-icon><Promotion /></el-icon>
+                    快递代码
+                  </div>
+                  <div class="info-value">
+                    <div class="courier-code">
+                      <el-tag v-if="courier.code" size="small" type="primary">{{ courier.code }}</el-tag>
+                      <span v-else class="no-data">未设置</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tracking Length Row -->
+                <div class="info-row">
+                  <div class="info-label">
+                    <el-icon><Document /></el-icon>
+                    单号长度
+                  </div>
+                  <div class="info-value">
+                    <div class="tracking-length-mobile">
+                      {{ courier.tracking_length || courier.trackingLength }} 位
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Description Row -->
+                <div v-if="courier.description" class="info-row">
+                  <div class="info-label">
+                    <el-icon><EditPen /></el-icon>
+                    备注
+                  </div>
+                  <div class="info-value">
+                    <div class="description">{{ courier.description }}</div>
+                  </div>
+                </div>
+
+                <!-- Time Row -->
+                <div class="info-row">
+                  <div class="info-label">
+                    <el-icon><Clock /></el-icon>
+                    创建时间
+                  </div>
+                  <div class="info-value">
+                    <div class="created-time">{{ formatDate(courier.created_at || courier.createdAt) }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card Actions -->
+              <div class="card-actions">
+                <!-- 编辑按钮 -->
+                <el-button
+                  type="primary"
+                  size="default"
+                  class="action-btn"
+                  @click="editCourier(courier)"
+                >
+                  <el-icon><Edit /></el-icon>
+                  编辑快递公司
+                </el-button>
+
+                <!-- 更多操作按钮 -->
+                <el-dropdown
+                  @command="(command) => handleMoreActions(courier, command)"
+                  trigger="click"
+                  class="action-dropdown"
+                >
+                  <el-button type="info" size="default" class="action-btn" plain>
+                    <el-icon><MoreFilled /></el-icon>
+                    更多操作
+                    <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                  </el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item
+                        :command="courier.status === 'active' ? 'disable' : 'enable'"
+                      >
+                        <el-icon v-if="courier.status === 'active'"><Hide /></el-icon>
+                        <el-icon v-else><View /></el-icon>
+                        {{ courier.status === 'active' ? '禁用' : '启用' }}
+                      </el-dropdown-item>
+                      <el-dropdown-item command="delete" divided>
+                        <el-icon><Delete /></el-icon>
+                        删除快递公司
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </el-card>
+          </div>
+        </div>
+      </div>
 
       <!-- Pagination -->
-      <div style="margin-top: 20px; text-align: center">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="totalCouriers"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+      <div class="pagination-wrapper">
+        <div class="pagination">
+          <el-pagination
+            v-model:current-page="currentPage"
+            v-model:page-size="pageSize"
+            :page-sizes="[10, 20, 50, 100]"
+            :total="totalCouriers"
+            :layout="paginationLayout"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+          />
+        </div>
       </div>
     </el-card>
 
@@ -200,7 +335,8 @@
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="500px"
+      :width="dialogWidth"
+      class="courier-dialog"
       @close="closeDialog"
     >
       <el-form
@@ -337,19 +473,26 @@ export default {
     }
 
     const couriers = computed(() => productStore.couriers)
-    
+
+    // Responsive computed properties
+    const isMobile = computed(() => window.innerWidth <= 768)
+    const dialogWidth = computed(() => isMobile.value ? '95%' : '500px')
+    const paginationLayout = computed(() =>
+      isMobile.value ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'
+    )
+
     const courierStats = computed(() => {
       const total = couriers.value.length
       const active = couriers.value.filter(c => c.status === 'active').length
       const inactive = total - active
-      
+
       return { total, active, inactive }
     })
-    
+
     const dialogTitle = computed(() => {
       return currentEditCourier.value ? '编辑快递公司' : '添加快递公司'
     })
-    
+
     const isEditing = computed(() => !!currentEditCourier.value)
 
     const filteredCouriers = computed(() => {
@@ -501,11 +644,40 @@ export default {
 
     const deleteCourier = async (courier) => {
       try {
+        await ElMessageBox.confirm(
+          `确定要删除快递公司"${courier.name}"吗？此操作不可恢复。`,
+          '确认删除',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+
         await productStore.deleteCourier(courier.id)
         ElMessage.success('快递公司删除成功')
         await refreshData()
       } catch (error) {
-        ElMessage.error('删除快递公司失败')
+        if (error !== 'cancel') {
+          ElMessage.error('删除快递公司失败')
+        }
+      }
+    }
+
+    // 更多操作处理
+    const handleMoreActions = async (courier, action) => {
+      try {
+        switch (action) {
+          case 'enable':
+          case 'disable':
+            await toggleCourierStatus(courier)
+            break
+          case 'delete':
+            await deleteCourier(courier)
+            break
+        }
+      } catch (error) {
+        console.error('More action error:', error)
       }
     }
 
@@ -530,6 +702,8 @@ export default {
       editForm,
       formRules,
       formRef,
+      dialogWidth,
+      paginationLayout,
       formatDate,
       handleSearch,
       handleSizeChange,
@@ -541,55 +715,84 @@ export default {
       closeDialog,
       saveCourier,
       toggleCourierStatus,
-      deleteCourier
+      deleteCourier,
+      handleMoreActions
     }
   }
 }
 </script>
 
 <style scoped>
+/* Base Styles */
 .courier-management {
   padding: 20px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
+/* Header */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .page-header h2 {
   margin: 0;
   color: #303133;
+  font-size: 24px;
+  font-weight: 600;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  width: 280px;
+  min-width: 200px;
+}
+
+.refresh-btn .btn-text {
+  margin-left: 4px;
+}
+
+/* Statistics Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .stat-card {
   height: 100px;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: all 0.3s ease;
+  border-radius: 8px;
 }
 
 .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 .stat-item {
   display: flex;
   align-items: center;
   height: 100%;
+  padding: 16px;
 }
 
 .stat-icon {
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -597,6 +800,7 @@ export default {
   margin-right: 16px;
   font-size: 20px;
   color: white;
+  flex-shrink: 0;
 }
 
 .stat-icon.total {
@@ -613,34 +817,251 @@ export default {
 
 .stat-content h3 {
   margin: 0 0 4px 0;
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
   color: #303133;
+  line-height: 1;
 }
 
 .stat-content p {
   margin: 0;
   color: #606266;
   font-size: 14px;
+  font-weight: 500;
+}
+
+/* Couriers Container */
+.couriers-container {
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .header-tools {
   display: flex;
   align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-:deep(.el-table) {
+.status-filter {
+  width: 120px;
+}
+
+/* Desktop Table View */
+.desktop-view {
+  display: block;
+}
+
+.couriers-table {
   font-size: 14px;
 }
 
-:deep(.el-table .cell) {
+.couriers-table :deep(.el-table__cell) {
   padding: 12px 8px;
+}
+
+.courier-info {
+  min-width: 0;
+}
+
+.courier-name {
+  font-weight: 500;
+  color: #303133;
+  margin-bottom: 2px;
+}
+
+.courier-details {
+  font-size: 12px;
+  color: #909399;
+}
+
+.no-data {
+  color: #c0c4cc;
+  font-size: 12px;
+}
+
+.tracking-length {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-weight: 500;
+  color: #409eff;
+}
+
+.tracking-pattern {
+  background: #f5f7fa;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #606266;
+}
+
+.desktop-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Mobile Card View */
+.mobile-view {
+  display: none;
+}
+
+.loading-state, .empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #909399;
+}
+
+.loading-state .el-icon,
+.empty-state .el-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.mobile-couriers {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.courier-card {
+  width: 100%;
+}
+
+.courier-card .el-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.courier-card .el-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.card-header-mobile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.courier-title {
+  font-weight: 700;
+  font-size: 18px;
+  color: #303133;
+}
+
+.card-body {
+  margin-bottom: 16px;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 8px 0;
+  min-height: 44px;
+}
+
+.info-label {
+  display: flex;
+  align-items: center;
+  min-width: 80px;
+  color: #606266;
+  font-weight: 500;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.info-label .el-icon {
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+.info-value {
+  flex: 1;
+  min-width: 0;
+}
+
+.info-value > div:first-child {
+  font-weight: 500;
+  color: #303133;
+  margin-bottom: 2px;
+}
+
+.courier-code .el-tag {
+  font-weight: 600;
+}
+
+.tracking-length-mobile {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-weight: 600;
+  color: #409eff;
+  font-size: 16px;
+}
+
+.description {
+  color: #606266;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.created-time {
+  color: #909399;
+  font-size: 14px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 12px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 16px;
+}
+
+.action-dropdown {
+  flex: 1;
+}
+
+.action-btn {
+  width: 100%;
+  height: 44px;
+  font-size: 14px;
+  font-weight: 500;
+  justify-content: center;
+}
+
+/* Pagination */
+.pagination-wrapper {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.pagination {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Dialog Styles */
+.courier-dialog :deep(.el-dialog__body) {
+  padding: 20px;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 500;
+  color: #606266;
 }
 
 :deep(.el-input-number) {
@@ -649,5 +1070,178 @@ export default {
 
 :deep(.el-input-number .el-input__inner) {
   text-align: left;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 768px) {
+  /* Mobile View Switching */
+  .desktop-view {
+    display: none;
+  }
+
+  .mobile-view {
+    display: block;
+  }
+
+  /* Layout Adjustments */
+  .courier-management {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .page-header h2 {
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .refresh-btn {
+    width: auto;
+    min-width: 80px;
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .refresh-btn .btn-text {
+    display: inline;
+    margin-left: 4px;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+    margin-top: 16px;
+  }
+
+  .stat-card {
+    height: 80px;
+  }
+
+  .stat-item {
+    flex-direction: column;
+    text-align: center;
+    padding: 12px;
+  }
+
+  .stat-icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 0;
+    margin-bottom: 8px;
+    font-size: 16px;
+  }
+
+  .stat-content h3 {
+    font-size: 20px;
+  }
+
+  .stat-content p {
+    font-size: 12px;
+  }
+
+  /* Card Header */
+  .card-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .header-tools {
+    justify-content: center;
+  }
+
+  .status-filter {
+    width: 100%;
+  }
+
+  /* Pagination */
+  .pagination :deep(.el-pagination__sizes),
+  .pagination :deep(.el-pagination__total),
+  .pagination :deep(.el-pagination__jump) {
+    display: none;
+  }
+
+  /* Dialog Adjustments */
+  .courier-dialog :deep(.el-dialog) {
+    margin: 5vh auto;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .courier-dialog :deep(.el-dialog__body) {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  :deep(.el-form-item__label) {
+    width: 80px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .courier-management {
+    padding: 12px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    height: 70px;
+  }
+
+  .stat-item {
+    flex-direction: row;
+    text-align: left;
+    padding: 12px;
+  }
+
+  .stat-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+  }
+
+  .stat-content h3 {
+    font-size: 18px;
+  }
+
+  .stat-content p {
+    font-size: 11px;
+  }
+
+  .courier-title {
+    font-size: 16px;
+  }
+
+  .info-label {
+    min-width: 70px;
+    font-size: 13px;
+  }
+
+  .action-btn {
+    height: 40px;
+    font-size: 13px;
+  }
 }
 </style>
