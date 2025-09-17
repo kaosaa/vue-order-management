@@ -61,21 +61,48 @@ cp .env.example .env
 # VUE_APP_API_URL=http://localhost:3001/api  # 开发环境API地址
 ```
 
-3. 安装依赖
+3. 安装前端依赖
 ```bash
 npm install
 # 或
 yarn install
 ```
 
-4. 启动开发服务器
+4. 安装并启动后端服务器
 ```bash
+# 进入后端目录
+cd server
+
+# 安装后端依赖
+npm install
+
+# 配置后端环境变量
+cp .env.example .env
+# 编辑 server/.env 文件配置数据库等信息
+
+# 初始化数据库
+npm run migrate
+
+# 创建测试数据（可选）
+npm run seed
+
+# 启动后端服务器
+npm start
+# 后端服务器将运行在 http://localhost:3001
+```
+
+5. 启动前端开发服务器
+```bash
+# 回到项目根目录
+cd ..
+
+# 启动前端开发服务器
 npm run dev
 # 或
 yarn dev
 ```
 
-5. 打开浏览器访问 http://localhost:3000
+6. 打开浏览器访问 http://localhost:3000
 
 ## 环境配置
 
@@ -84,31 +111,153 @@ yarn dev
 在项目根目录创建`.env`文件：
 
 ```env
-# API服务器地址
+# API服务器地址（Vite环境变量）
+VITE_API_URL=http://localhost:3001/api
 VUE_APP_API_URL=http://localhost:3001/api
 
 # 应用配置
+VITE_APP_NAME=订单管理系统
 VUE_APP_NAME=订单管理系统
+
+VITE_APP_VERSION=1.0.0
 VUE_APP_VERSION=1.0.0
+
+VITE_APP_DEBUG=true
 VUE_APP_DEBUG=true
 
 # 分页配置
+VITE_APP_DEFAULT_PAGE_SIZE=20
 VUE_APP_DEFAULT_PAGE_SIZE=20
 
 # 文件上传配置
+VITE_APP_MAX_FILE_SIZE=10
 VUE_APP_MAX_FILE_SIZE=10
+
+VITE_APP_SUPPORTED_IMAGE_FORMATS=jpg,jpeg,png,gif,webp
 VUE_APP_SUPPORTED_IMAGE_FORMATS=jpg,jpeg,png,gif,webp
+```
+
+### 后端环境变量
+
+在`server/`目录创建`.env`文件：
+
+```env
+# 服务器配置
+PORT=3001
+NODE_ENV=development
+
+# 前端域名（CORS配置）
+FRONTEND_URL=http://localhost:3000
+
+# JWT配置
+JWT_SECRET=your-super-secret-jwt-key-here
+JWT_EXPIRES_IN=7d
+
+# 数据库配置
+DB_PATH=./database.sqlite
+
+# 调试模式
+DEBUG=true
 ```
 
 ### 生产环境部署
 
-生产环境需要修改`.env.production`文件：
+#### 前端生产环境
+
+修改`.env.production`文件：
 
 ```env
+VITE_API_URL=https://your-api-domain.com/api
 VUE_APP_API_URL=https://your-api-domain.com/api
+VITE_APP_DEBUG=false
 VUE_APP_DEBUG=false
+VITE_APP_ENABLE_CONSOLE_LOG=false
 VUE_APP_ENABLE_CONSOLE_LOG=false
 ```
+
+构建前端：
+```bash
+npm run build
+```
+
+#### 后端生产环境
+
+修改`server/.env`文件：
+```env
+PORT=3001
+NODE_ENV=production
+FRONTEND_URL=https://your-frontend-domain.com
+JWT_SECRET=your-production-jwt-secret
+JWT_EXPIRES_IN=7d
+DEBUG=false
+```
+
+启动生产服务器：
+```bash
+cd server
+npm start
+```
+
+## API接口文档
+
+### 认证接口
+- `POST /api/auth/register` - 用户注册
+- `POST /api/auth/login` - 用户登录
+- `GET /api/auth/profile` - 获取用户信息
+- `PUT /api/auth/profile` - 更新用户信息
+
+### 订单接口
+- `GET /api/orders/my-orders` - 获取用户订单
+- `POST /api/orders` - 创建订单
+- `PUT /api/orders/:id/cancel` - 取消订单
+
+### 管理员接口
+- `GET /api/admin/orders` - 获取所有订单
+- `PUT /api/admin/orders/:id` - 更新订单状态
+- `GET /api/admin/users` - 获取所有用户
+- `PUT /api/admin/users/:id` - 更新用户信息
+
+### 商品接口
+- `GET /api/products` - 获取商品列表
+- `POST /api/admin/products` - 创建商品（管理员）
+- `PUT /api/admin/products/:id` - 更新商品（管理员）
+
+### 快递接口
+- `GET /api/couriers` - 获取快递公司列表
+- `POST /api/admin/couriers` - 创建快递公司（管理员）
+- `PUT /api/admin/couriers/:id` - 更新快递公司（管理员）
+
+## 默认账户
+
+系统初始化后会创建以下测试账户：
+
+### 管理员账户
+- 手机号：`13800138000`
+- 密码：`admin123`
+- 角色：管理员
+
+### 普通用户账户
+- 手机号：`13800138001`
+- 密码：`user123`
+- 角色：普通用户
+
+## 数据库
+
+项目使用SQLite数据库，数据库文件位于`server/database.sqlite`。
+
+### 数据库初始化
+```bash
+cd server
+npm run migrate  # 创建表结构
+npm run seed     # 插入测试数据
+```
+
+### 数据库表结构
+- `users` - 用户表
+- `products` - 商品表
+- `couriers` - 快递公司表
+- `orders` - 订单表
+- `admin_logs` - 管理员操作日志表
 
 ### 构建部署
 
