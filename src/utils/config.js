@@ -3,9 +3,18 @@
  * 统一管理API地址和请求配置
  */
 
+// 安全获取环境变量的辅助函数
+const getEnv = (key, defaultValue = '') => {
+  try {
+    return import.meta.env[key] || defaultValue
+  } catch (error) {
+    return defaultValue
+  }
+}
+
 // 获取API基础URL
 export const getApiBaseUrl = () => {
-  return import.meta.env.VUE_APP_API_URL || process.env.VUE_APP_API_URL || 'http://localhost:3001/api'
+  return getEnv('VITE_API_URL') || getEnv('VUE_APP_API_URL') || 'http://localhost:3001/api'
 }
 
 // 获取完整的API URL
@@ -19,25 +28,33 @@ export const getApiUrl = (path = '') => {
 // 获取应用配置
 export const getAppConfig = () => {
   return {
-    name: import.meta.env.VUE_APP_NAME || process.env.VUE_APP_NAME || '订单管理系统',
-    version: import.meta.env.VUE_APP_VERSION || process.env.VUE_APP_VERSION || '1.0.0',
-    debug: (import.meta.env.VUE_APP_DEBUG || process.env.VUE_APP_DEBUG || 'false') === 'true',
-    enableConsoleLog: (import.meta.env.VUE_APP_ENABLE_CONSOLE_LOG || process.env.VUE_APP_ENABLE_CONSOLE_LOG || 'false') === 'true',
-    defaultPageSize: parseInt(import.meta.env.VUE_APP_DEFAULT_PAGE_SIZE || process.env.VUE_APP_DEFAULT_PAGE_SIZE || '20'),
-    maxFileSize: parseInt(import.meta.env.VUE_APP_MAX_FILE_SIZE || process.env.VUE_APP_MAX_FILE_SIZE || '10'),
-    supportedImageFormats: (import.meta.env.VUE_APP_SUPPORTED_IMAGE_FORMATS || process.env.VUE_APP_SUPPORTED_IMAGE_FORMATS || 'jpg,jpeg,png,gif,webp').split(','),
-    tokenExpireWarningTime: parseInt(import.meta.env.VUE_APP_TOKEN_EXPIRE_WARNING_TIME || process.env.VUE_APP_TOKEN_EXPIRE_WARNING_TIME || '5')
+    name: getEnv('VITE_APP_NAME') || getEnv('VUE_APP_NAME') || '订单管理系统',
+    version: getEnv('VITE_APP_VERSION') || getEnv('VUE_APP_VERSION') || '1.0.0',
+    debug: (getEnv('VITE_APP_DEBUG') || getEnv('VUE_APP_DEBUG') || 'false') === 'true',
+    enableConsoleLog: (getEnv('VITE_APP_ENABLE_CONSOLE_LOG') || getEnv('VUE_APP_ENABLE_CONSOLE_LOG') || 'true') === 'true',
+    defaultPageSize: parseInt(getEnv('VITE_APP_DEFAULT_PAGE_SIZE') || getEnv('VUE_APP_DEFAULT_PAGE_SIZE') || '20'),
+    maxFileSize: parseInt(getEnv('VITE_APP_MAX_FILE_SIZE') || getEnv('VUE_APP_MAX_FILE_SIZE') || '10'),
+    supportedImageFormats: (getEnv('VITE_APP_SUPPORTED_IMAGE_FORMATS') || getEnv('VUE_APP_SUPPORTED_IMAGE_FORMATS') || 'jpg,jpeg,png,gif,webp').split(','),
+    tokenExpireWarningTime: parseInt(getEnv('VITE_APP_TOKEN_EXPIRE_WARNING_TIME') || getEnv('VUE_APP_TOKEN_EXPIRE_WARNING_TIME') || '5')
   }
 }
 
 // 检查是否为开发环境
 export const isDevelopment = () => {
-  return import.meta.env.DEV || process.env.NODE_ENV === 'development'
+  try {
+    return import.meta.env.DEV || false
+  } catch (error) {
+    return false
+  }
 }
 
 // 检查是否为生产环境
 export const isProduction = () => {
-  return import.meta.env.PROD || process.env.NODE_ENV === 'production'
+  try {
+    return import.meta.env.PROD || false
+  } catch (error) {
+    return true
+  }
 }
 
 // 控制台日志工具（根据环境配置）
